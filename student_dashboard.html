@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>student Dashboard - EduBond</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: #343a40;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #495057;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .logout-btn {
+            margin-top: auto;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        .user-message, .edubond-message {
+        max-width: 70%;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 12px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background-color: #d9f9d9;
+            align-self: flex-end;
+        }
+
+        .edbond-message {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #chat-box {
+            display: flex;
+            flex-direction: column;
+        }
+        .video-upload-container {
+            max-width: 100%;
+            padding: 20px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s ease;
+        }
+        .video-upload-container:hover {
+            background-color: #e9ecef;
+        }
+        .video-drop-area {
+            padding: 20px;
+        }
+        .video-input {
+            display: none;
+        }
+        .insight-card {
+            display: flex;
+            flex-direction: row;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            max-height: 300px;
+        }
+        .insight-card video {
+            width: 350px;
+            height: auto;
+            border-radius: 8px;
+        }
+        .insight-details {
+            flex: 1;
+            padding-left: 15px;
+        }
+        .insight-details h5 {
+            margin-bottom: 10px;
+        }
+        .comment-section {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .comment-card {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .audio-section {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="text-center">Student Dashboard</h3>
+        <a href="#" onclick="showSection('prepare-myself')">Ask Edubond</a>
+        <a href="#" onclick="showSection('view-insights')">View Insights</a>
+        <a href="#" onclick="showSection('alttext-addon')">AltText Addon</a>
+        <a href="#" onclick="showSection('org-admin-notifications'); fetchOrgAdminNotifications();">EduBond Notifications</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="content">
+        
+
+
+        <!-- Prepare Myself Section -->
+        <div id="prepare-myself" class="section" style="display:none;">
+            <h2>Help me Prepare with Edubond</h2>
+            
+            <div class="chat-container" style="max-height: 500px; overflow-y: auto; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
+                <div id="chat-box">
+                    <!-- Chat messages will appear here -->
+                </div>
+            </div>
+            <textarea class="form-control mt-3" id="userPrompt" placeholder="Ask Edubond..."></textarea>
+            <button class="btn btn-primary mt-2" onclick="sendPrompt()">Submit</button>
+            <button class="btn btn-danger mt-2" onclick="clearChat()">Clear Chat</button>
+        </div>
+
+        <!-- Post a Reminder Section -->
+        <div id="post-reminder" class="section" style="display:none;">
+            <h2>Post a Reminder</h2>
+            <select class="form-control">
+                <option>General Notification</option>
+                <option>Assignment Due</option>
+                <option>Exam Reminder</option>
+            </select>
+            <textarea class="form-control mt-3" placeholder="Enter your message..."></textarea>
+            <button class="btn btn-primary mt-3">Submit</button>
+        </div>
+
+        <!-- View Insights Section -->
+        <div id="view-insights" class="section" style="display:none;">
+            <h2>View Insights</h2>
+            <div id="insights-container" class="row">
+                <!-- Insights will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Org Admin Notifications Section -->
+        <div id="org-admin-notifications" class="section" style="display:none;">
+            <h2>Edubond Notifications</h2>
+            <div id="org-admin-notification-count" class="mb-3">
+                <strong>Total Notifications:</strong> <span id="admin-notification-count">0</span>
+            </div>
+            <div id="org-admin-notification-container" class="row">
+                <!-- Cards will be displayed here -->
+            </div>
+        </div>
+
+        <!-- AltText Addon Section -->
+        <!-- AltText Addon Section -->
+        <div id="alttext-addon" class="section" style="display:none;">
+            <h2>AltText Addon</h2>
+            <form id="alttext-form">
+                <input type="file" id="alttext-image" class="form-control" required>
+                <select class="form-control mt-3" id="alttext-subject" required>
+                    <option value="">Select Subject</option>
+                    <option value="Math">Math</option>
+                    <option value="Chem">Chemistry</option>
+                </select>
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            </form>
+            <div id="alttext-results" class="mt-3">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+    async function fetchOrgAdminNotifications() {
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/get-org-notifs/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Token ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const container = document.getElementById('org-admin-notification-container');
+                const countElement = document.getElementById('admin-notification-count');
+
+                container.innerHTML = ''; // Clear previous data
+                countElement.textContent = data.notifications.length;
+
+                data.notifications.forEach(notification => {
+                    const card = `
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">${notification.type}</h5>
+                                <p class="card-text">${notification.content}</p>
+                                <h5 class="card-title">preferred Language</h5>
+                                <p class="card-text">${notification.converted_msg}</p>
+                                <p class="card-text"><small class="text-muted">Date: ${notification.date} Time: ${notification.time}</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } else {
+                const errorData = await response.json();
+                console.error('Error fetching org-admin notifications:', errorData.detail);
+                alert('Failed to fetch notifications');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.querySelector('#org-admin-notifications').style.display !== 'none') {
+            fetchOrgAdminNotifications();
+        }
+    });
+
+    document.getElementById('alttext-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const token = localStorage.getItem("token");
+        const imageInput = document.getElementById('alttext-image');
+        const subject = document.getElementById('alttext-subject').value;
+        const file = imageInput.files[0];
+
+        if (!file || !subject) {
+            alert('Please upload an image and select a subject.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('topic_subject', subject);
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/get-altext/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const resultsContainer = document.getElementById('alttext-results');
+                const resultCard = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>${data.subject}</h5>
+                            <img src="${data.image_url}" class="img-fluid mb-2" alt="Uploaded Image">
+                            <p><strong>LaTeX:</strong> ${data.latex}</p>
+                            <p><strong>Alt Text:</strong> ${data.alttext}</p>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.innerHTML = resultCard;
+            } else {
+                const errorData = await response.json();
+                alert(errorData.detail || 'Failed to generate AltText.');
+            }
+        } catch (error) {
+            console.error('Error generating AltText:', error);
+            alert('An error occurred while generating AltText.');
+        }
+    });
+
+    document.getElementById('alttext-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const fileInput = document.getElementById('alttext-file').files[0];
+        const subjectType = document.getElementById('subject-type').value;
+
+        if (!fileInput || !subjectType) {
+          alert("Please select an image file and subject type.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', fileInput);
+        formData.append('subject', subjectType);
+
+        try {
+          const response = await fetch('http://34.121.13.79/user/alttext-addon/', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Token ${token}`
+            },
+            body: formData
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            displayAltTextResult(data);
+          } else {
+            alert('Failed to get AltText response.');
+          }
+        } catch (error) {
+          console.error('Error fetching AltText:', error);
+        }
+      });
+
+      function displayAltTextResult(data) {
+        const container = document.getElementById('alttext-results');
+        const card = `
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5>Generated LaTeX</h5>
+              <p>${data.latex || 'N/A'}</p>
+              <h5>Generated Alt Text</h5>
+              <p>${data.alttext || 'N/A'}</p>
+            </div>
+          </div>
+        `;
+        container.innerHTML = card + container.innerHTML;
+    }
+
+    async function fetchInsights() {
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/view-insights/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Token ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const insightsContainer = document.getElementById('insights-container');
+                insightsContainer.innerHTML = ''; 
+
+                data.insights.forEach(insight => {
+                    const report = insight.edubond_report;
+                    const parentComments = insight.parent_report;
+
+                    const card = `
+                    <div class="insight-card">
+                        <div>
+                            <video controls>
+                                <source src="${insight.video_url}" type="video/mp4">
+                            </video>
+                            <audio controls class="audio-section">
+                                <source src="${insight.audio_url}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        <div class="insight-details">
+                            <h5>${insight.topic_name}</h5>
+                            <p><strong>Date:</strong> ${insight.created_date}</p>
+                            <p><strong>EduBond AI Report:</strong></p>
+                            <ul>
+                                <li>Clarity: ${report.clarity || 'N/A'}</li>
+                                <li>Analysis: ${report.analysis || 'N/A'}</li>
+                                <li>Speaking: ${report.speaking || 'N/A'}</li>
+                                <li>Engagement: ${report.engagement || 'N/A'}</li>
+                            </ul>
+                            <p><strong>Parent Comments:</strong></p>
+                            <div class="comment-section">
+                                ${Object.entries(parentComments || {}).map(([key, value]) => `
+                                    <div class="comment-card"><strong>${key}:</strong> ${value}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                    insightsContainer.innerHTML += card;
+                });
+            } else {
+                const errorData = await response.json();
+                console.error('Error fetching insights:', errorData.detail);
+                alert('Failed to fetch insights');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.querySelector('#view-insights').style.display !== 'none') {
+            fetchInsights();
+        }
+    });
+
+    function triggerFileInput() {
+        document.getElementById('video-upload').click();
+    }
+
+    function handleVideoDrop(event) {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('video-upload').files = event.dataTransfer.files;
+            document.querySelector('.video-drop-area p').innerText = `Selected: ${file.name}`;
+        }
+    }
+
+    function handleVideoSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            document.querySelector('.video-drop-area p').innerText = `Selected: ${file.name}`;
+        }
+    }
+
+    async function uploadVideo() {
+        const token = localStorage.getItem("token");
+        const fileInput = document.getElementById('video-upload');
+        const topicName = document.getElementById('videoTopic').value.trim();
+        const file = fileInput.files[0];
+
+        if (!file || !topicName) {
+            alert('Please select a video file and enter a topic name.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('video', file);
+        formData.append('topic_name', topicName);
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/video-edubond/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                document.getElementById('video-upload-success-message').style.display = 'block';
+                document.getElementById('video-upload-error-message').style.display = 'none';
+                document.getElementById('videoTopic').value = '';
+                document.getElementById('video-upload').value = '';
+                document.querySelector('.video-drop-area p').innerText = 'Drag & drop your video here or click to select';
+            } else {
+                const errorData = await response.json();
+                document.getElementById('video-upload-error-message').innerText = errorData.detail || 'Failed to upload video';
+                document.getElementById('video-upload-error-message').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error uploading video:', error);
+            document.getElementById('video-upload-error-message').innerText = 'An error occurred while uploading the video.';
+            document.getElementById('video-upload-error-message').style.display = 'block';
+        }
+    }
+
+    document.getElementById('studentOnboardForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const token = localStorage.getItem("token");
+        const payload = {
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            email: document.getElementById('email').value,
+            phone_number: document.getElementById('phone_number').value,
+            password: document.getElementById('password').value,
+            preferred_language : document.getElementById("preferredLanguage").value,
+            parent_email : document.getElementById("parentEmail").value
+        };
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/onboard-student-directupload/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                document.getElementById('student-success-message').style.display = 'block';
+                document.getElementById('studentOnboardForm').reset();
+            } else {
+                const errorData = await response.json();
+                document.getElementById('student-error-message').innerText = errorData.detail || 'Failed to onboard student';
+                document.getElementById('student-error-message').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error onboarding student:', error);
+            document.getElementById('student-error-message').innerText = 'An error occurred while onboarding the student.';
+            document.getElementById('student-error-message').style.display = 'block';
+        }
+    });
+
+    function clearChat() {
+        document.getElementById('chat-box').innerHTML = '';
+    }
+
+    async function uploadExcel() {
+        const token = localStorage.getItem("token");
+        const fileInput = document.getElementById('excel-file');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select an Excel file to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/upload-student-excel/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('Students Onboarded successfully.');
+                fileInput.value = '';
+            } else {
+                const errorData = await response.json();
+                alert('Failed to upload Excel file: ' + errorData.detail || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('Error uploading Excel file:', error);
+            alert('An error occurred while uploading the Excel file.');
+        }
+    }
+    async function sendPrompt() {
+        const token = localStorage.getItem("token");
+        const userPrompt = document.getElementById('userPrompt').value.trim();
+
+        if (!userPrompt) {
+            alert("Please enter a valid prompt.");
+            return;
+        }
+
+        // Show user prompt in the chat box
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML += `<div class="user-message"><strong>You:</strong> ${userPrompt}</div>`;
+
+        // Clear input
+        document.getElementById('userPrompt').value = '';
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/ask-edubond/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify({ prompt: userPrompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                chatBox.innerHTML += `<div class="edubond-message"><strong>EduBond:</strong> ${data.response}</div>`;
+            } else {
+                chatBox.innerHTML += `<div class="edubond-message"><strong>EduBond:</strong> Failed to get a response from AI.</div>`;
+            }
+        } catch (error) {
+            console.error('Error fetching AI response:', error);
+            chatBox.innerHTML += `<div class="edubond-message"><strong>AI:</strong> An error occurred while processing your request.</div>`;
+        }
+    }
+    </script>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+
+            // Load students only when the student list is shown
+            if (sectionId === 'student-list') {
+                fetchStudents();
+            }
+            if (sectionId === 'notifications') {
+            fetchNotifications();
+            }
+            if (sectionId === 'view-insights') {
+                fetchInsights();
+            }
+
+        }
+
+        //fetch my notifications
+        function fetchNotifications() {
+            const token = localStorage.getItem("token");
+
+            // Show loading spinner
+            document.getElementById("loading-notifications").style.display = "block";
+            document.getElementById("notification-table").innerHTML = ""; // Clear previous data
+
+            fetch("http://34.121.13.79/user/announcement-view/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById("notification-table");
+                document.getElementById("loading-notifications").style.display = "none"; // Hide loading spinner
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='5' class='text-center'>No notifications available.</td></tr>";
+                    return;
+                }
+
+                data.forEach(notification => {
+                    const row = `
+                        <tr>
+                            <td>${notification.notification_content}</td>
+                            <td>${notification.type_of_notification}</td>
+                            <td>${notification.date}</td>
+                            <td>${notification.time}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deleteNotification(${notification.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching notifications:", error);
+                document.getElementById("loading-notifications").innerHTML = "<p style='color: red;'>Failed to load notifications. Please try again.</p>";
+            });
+            }
+
+        function deleteNotification(notificationId) {
+                const token = localStorage.getItem("token");
+
+                fetch("http://34.121.13.79/user/announcement-view/", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ notification_id: notificationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Notification Deleted:", data);
+                    fetchNotifications(); // Refresh the list after deleting
+                })
+                .catch(error => console.error("Error deleting notification:", error));
+            }
+
+        function fetchNotificationCount() {
+            const token = localStorage.getItem("token");
+            document.getElementById("notification-count").innerText = "Loading...";
+
+            fetch("http://34.121.13.79/user/notifications/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("notification-count").innerText = data.notification_count || 0;
+            })
+            .catch(error => {
+                console.error("Error fetching notification count:", error);
+                document.getElementById("notification-count").innerText = "Error!";
+            });
+        }
+        document.getElementById("announcement-form").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent page reload
+
+            const notificationContent = document.getElementById("notification-content").value;
+            const notificationType = document.getElementById("notification-type").value;
+            const token = localStorage.getItem("token");
+
+            if (!notificationContent.trim()) {
+                alert("Please enter a valid announcement.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://34.121.13.79/user/notifications/", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        notification_content: notificationContent,
+                        type_of_notification: notificationType
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Announcement posted successfully!");
+                    // **🔹 Clear the input fields after successful submission**
+                    document.getElementById("announcement-form").reset();  
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to post announcement.");
+                }
+            } catch (error) {
+                console.error("Error posting announcement:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        });
+
+        function logout() {
+            const token = localStorage.getItem("token");
+
+            fetch("http://34.121.13.79/user/logout/", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            }).then(() => {
+                localStorage.removeItem("token");
+                window.location.href = "index.html";
+            }).catch(() => {
+                alert("Logout failed. Please try again.");
+            });
+        }
+
+        function fetchStudents() {
+            const token = localStorage.getItem("token");
+
+            fetch("http://34.121.13.79/user/view-students/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const studentList = data.students;
+                document.getElementById("student-count").innerText = studentList.length;
+                let tableBody = document.getElementById("student-table-body");
+                tableBody.innerHTML = "";
+
+                studentList.forEach(student => {
+                    const row = `
+                        <tr>
+                            <td>${student.first_name} ${student.last_name}</td>
+                            <td>${student.student_class}</td>
+                            <td>${student.parent_email}</td>
+                            <td>${student.parent_contact}</td>
+                            <td>${student.preferred_language}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching students:', error);
+                document.getElementById("student-count").innerText = "0";
+                document.getElementById("student-table-body").innerHTML = "<tr><td colspan='4'>Error loading students. Please try again later.</td></tr>";
+            });
+        }
+    </script>
+</body>
+</html>

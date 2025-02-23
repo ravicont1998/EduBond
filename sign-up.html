@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  ================================================== -->
+  <meta charset="utf-8">
+  <title>EDUBOND SIGNUP</title>
+
+  <!-- Mobile Specific Metas
+  ================================================== -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Bootstrap App Landing Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Small Apps Template v1.0">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.png" />
+  
+  <!-- PLUGINS CSS STYLE -->
+  <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+  <link rel="stylesheet" href="plugins/slick/slick.css">
+  <link rel="stylesheet" href="plugins/slick/slick-theme.css">
+  <link rel="stylesheet" href="plugins/fancybox/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="plugins/aos/aos.css">
+
+  <!-- CUSTOM CSS -->
+  <link href="css/style.css" rel="stylesheet">
+
+</head>
+
+<body class="body-wrapper" data-spy="scroll" data-target=".privacy-nav">
+
+<!--=============================
+=            Sign Up            =
+==============================-->
+
+<section class="user-login section">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<div class="block">
+					<!-- Image -->
+					<div class="image align-self-center">
+						<!-- <img class="img-fluid" src="images/Login/sign-up.jpg" alt="desk-image"> -->
+					</div>
+					<!-- Content -->
+					<div class="content text-center">
+						<div class="logo">
+							<a href="index.html"><img src="images/logo.png" alt=""></a>
+						</div>
+						<div class="title-text">
+							<h3>Sign Up for a New Account</h3>
+						</div>
+						<form id="signupForm">
+							<!-- First Name -->
+							<input class="form-control main" id="first_name" type="text" placeholder="First Name" required>
+							<!-- Last Name -->
+							<input class="form-control main" id="last_name" type="text" placeholder="Last Name" required>
+							<!-- Email -->
+							<input class="form-control main" id="email" type="email" placeholder="Email Address" required>
+							<!-- Phone Number -->
+							<input class="form-control main" id="phone_number" type="text" placeholder="Phone Number" required>
+							<!-- Password -->
+							<input class="form-control main" id="password" type="password" placeholder="Password" required>
+							
+							<!-- User Type -->
+							<select class="form-control main" id="type_of_user" required>
+								<option value="">Select User Type</option>
+								<option value="org-admin">Organization Admin</option>
+								<option value="teacher">Teacher</option>
+							</select>
+
+							<!-- Fields for Org-Admin -->
+							<div id="org-admin-fields" style="display: none;">
+								<input class="form-control main" id="org_name" type="text" placeholder="Organization Name">
+								<input class="form-control main" id="state" type="text" placeholder="State">
+								<input class="form-control main" id="address" type="text" placeholder="Address">
+								<input class="form-control main" id="pincode" type="text" placeholder="Pincode">
+								<input class="form-control main" id="country" type="text" placeholder="Country">
+							</div>
+
+							<!-- Fields for Teacher -->
+							<div id="teacher-fields" style="display: none;">
+								<select class="form-control main" id="organization_id">
+									<option value="">Select Organization</option>
+								</select>
+								<input class="form-control main" id="class_number" type="text" placeholder="Class Number">
+							</div>
+
+							<!-- Submit Button -->
+							<button type="submit" class="btn btn-main-md">Sign Up</button>
+						</form>
+						
+						<div class="new-account">
+							<p>By clicking “Sign Up” I agree to <a href="privacy-policy.html">Terms & Conditions</a></p>
+							<p>Already have an account? <a href="sign-in.html">SIGN IN</a></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!--====  End of Sign Up  ====-->
+
+
+  <!-- To Top -->
+  <div class="scroll-top-to">
+    <i class="ti-angle-up"></i>
+  </div>
+  <!-- JAVASCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const typeOfUser = document.getElementById("type_of_user");
+    const orgAdminFields = document.getElementById("org-admin-fields");
+    const teacherFields = document.getElementById("teacher-fields");
+    const organizationDropdown = document.getElementById("organization_id");
+
+    // Fetch Organizations for Teacher Signup
+    async function fetchOrganizations() {
+        try {
+            // const token = localStorage.getItem("token"); // Assuming login stores token
+            const response = await fetch("http://34.121.13.79/user/org-list/", {
+                headers: {
+                    // "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                },
+            });
+            const data = await response.json();
+            organizationDropdown.innerHTML = '<option value="">Select Organization</option>';
+            data.forEach(org => {
+                organizationDropdown.innerHTML += `<option value="${org.id}">${org.name} (${org.pincode})</option>`;
+            });
+        } catch (error) {
+            console.error("Error fetching organizations:", error);
+        }
+    }
+
+    // Show/Hide Fields Based on User Type Selection
+    typeOfUser.addEventListener("change", function () {
+        if (this.value === "org-admin") {
+            orgAdminFields.style.display = "block";
+            teacherFields.style.display = "none";
+        } else if (this.value === "teacher") {
+            orgAdminFields.style.display = "none";
+            teacherFields.style.display = "block";
+            fetchOrganizations(); // Fetch organizations when "Teacher" is selected
+        } else {
+            orgAdminFields.style.display = "none";
+            teacherFields.style.display = "none";
+        }
+    });
+
+    // Handle Signup Form Submission
+    document.getElementById("signupForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const userType = typeOfUser.value;
+        let payload = {
+            first_name: document.getElementById("first_name").value,
+            last_name: document.getElementById("last_name").value,
+            email: document.getElementById("email").value,
+            phone_number: document.getElementById("phone_number").value,
+            password: document.getElementById("password").value,
+            type_of_user: userType
+        };
+
+        if (userType === "org-admin") {
+            payload.org_name = document.getElementById("org_name").value;
+            payload.state = document.getElementById("state").value;
+            payload.address = document.getElementById("address").value;
+            payload.pincode = document.getElementById("pincode").value;
+            payload.country = document.getElementById("country").value;
+        } else if (userType === "teacher") {
+            payload.organization_id = document.getElementById("organization_id").value;
+            payload.class_number = document.getElementById("class_number").value;
+            payload.from_admin = false;
+        }
+
+        try {
+            const response = await fetch("http://34.121.13.79/user/user-view/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Signup Successful! Redirecting to Login...");
+                window.location.href = "sign-in.html";
+            } else {
+                alert("Signup Failed: " + (data.detail || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error during signup:", error);
+            alert("An error occurred. Please try again.");
+        }
+    });
+});
+</script>
+
+  <!-- JAVASCRIPTS -->
+  <script src="plugins/jquery/jquery.min.js"></script>
+  <script src="plugins/bootstrap/bootstrap.min.js"></script>
+  <script src="plugins/slick/slick.min.js"></script>
+  <script src="plugins/fancybox/jquery.fancybox.min.js"></script>
+  <script src="plugins/syotimer/jquery.syotimer.min.js"></script>
+  <script src="plugins/aos/aos.js"></script>
+  <!-- google map -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgeuuDfRlweIs7D6uo4wdIHVvJ0LonQ6g"></script>
+  <script src="plugins/google-map/gmap.js"></script>
+  
+  <script src="js/script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBond Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+        }
+        .menu {
+            flex-grow: 1;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .sidebar a:hover {
+            background: #34495e;
+            border-radius: 5px;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            width: 100%;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        table {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-control, .btn {
+            border-radius: 5px;
+        }
+        .title-text {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h4>EduBond Dashboard</h4>
+            <div class="menu">
+                <a href="#home" onclick="showSection('home')"><i class="fas fa-home"></i> Home</a>
+                <a href="#teachers" onclick="showSection('teachers')"><i class="fas fa-chalkboard-teacher"></i> Teachers</a>
+                <a href="#students" onclick="showSection('students')"><i class="fas fa-user-graduate"></i> Students</a>
+                <!-- <a href="#videos" onclick="showSection('videos')"><i class="fas fa-video"></i> Video Upload</a>
+                <a href="#analytics" onclick="showSection('analytics')"><i class="fas fa-chart-line"></i> Analytics</a> -->
+                <a href="#settings" onclick="showSection('settings')"><i class="fas fa-cogs"></i> Settings</a>
+                <a href="#onboard-teacher-admin" onclick="showSection('onboard-teacher-admin')"><i class="fas fa-cogs"></i> Onboard</a>
+                <a href="#post-announcement" onclick="showSection('post-announcement'); fetchNotificationCount();">
+                    <i class="fas fa-bullhorn"></i> Post Announcement
+                </a>
+                 <a href="#notifications" onclick="showSection('notifications');"><i class="fas fa-bell"></i> View Annoucements</a>
+                <a href="#pending-requests" onclick="showSection('pending-requests');"><i class="fas fa-user-clock"></i> Approve Pending Requests</a>
+               
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="content">
+
+        <!-- // home page content starts -->
+        <div id="home" class="section">
+            <h2>Admin Dashboard Overview</h2>
+            
+            <div class="row">
+                <!-- Total Students -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-graduate fa-3x"></i>
+                            <h5 class="card-title mt-3">Total Students</h5>
+                            <p class="card-text fs-4">500</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Teachers -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chalkboard-teacher fa-3x"></i>
+                            <h5 class="card-title mt-3">Total Teachers</h5>
+                            <p class="card-text fs-4">50</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x"></i>
+                            <h5 class="card-title mt-3">Active Users</h5>
+                            <p class="card-text fs-4">320</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Approvals -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-clock fa-3x"></i>
+                            <h5 class="card-title mt-3">Pending Approvals</h5>
+                            <p class="card-text fs-4">12</p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="row mt-4">
+                    <!-- Student Growth Chart -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-chart-line"></i> Student Growth
+                            </div>
+                            <div class="card-body">
+                                <canvas id="studentGrowthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Upload Insights -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <i class="fas fa-video"></i> Video Uploads Insights
+                            </div>
+                            <div class="card-body">
+                                <canvas id="videoUploadsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        <!-- home page content ends -->
+
+            <div id="onboard-teacher-admin" class="section" style="display: none;">
+                <h2 class="title-text">Onboard Admin / Teacher</h2>
+                <form id="signupForm">
+                    <!-- First Name -->
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input class="form-control" id="first_name" type="text" placeholder="Enter First Name" required>
+                    </div>
+                    
+                    <!-- Last Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-control" id="last_name" type="text" placeholder="Enter Last Name" required>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" id="email" type="email" placeholder="Enter Email" required>
+                    </div>
+                    
+                    <!-- Phone Number -->
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input class="form-control" id="phone_number" type="text" placeholder="Enter Phone Number" required>
+                    </div>
+                    
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input class="form-control" id="password" type="password" placeholder="Enter Password" required>
+                    </div>
+
+                    <!-- User Type -->
+                    <div class="mb-3">
+                        <label class="form-label">Select User Type</label>
+                        <select class="form-control" id="type_of_user" required>
+                            <option value="">Select User Type</option>
+                            <option value="org-admin">Organization Admin</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                    </div>
+
+                    <!-- Organization Fields for Admin -->
+                    <div id="org-admin-fields" class="hidden">
+                        <h5>Organization Details</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Organization Name</label>
+                            <input class="form-control" id="org_name" type="text" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">State</label>
+                            <input class="form-control" id="state" type="text" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input class="form-control" id="address" type="text" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pincode</label>
+                            <input class="form-control" id="pincode" type="text" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input class="form-control" id="country" type="text" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Organization Selection for Teachers -->
+                    <div id="teacher-fields" class="hidden">
+                        <h5>Teacher Details</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Select Organization</label>
+                            <select class="form-control" id="organization_id" required>
+                                <option value="">Select Organization</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Class Number</label>
+                            <input class="form-control" id="class_number" type="text" placeholder="Enter Class Number">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100">Onboard User</button>
+                </form>
+            </div>
+
+
+
+
+
+
+
+        <!-- Post an Announcement Section -->
+            <div id="post-announcement" class="section" style="display: none;">
+                <h2>Post an Announcement</h2>
+                
+                <!-- Total Notifications Display -->
+                <div class="alert alert-info">
+                    <strong>Total Announcements:</strong> <span id="notification-count">Loading...</span>
+                </div>
+
+                <!-- Form -->
+                <form id="announcement-form">
+                    <div class="mb-3">
+                        <label for="notification-type" class="form-label"><b>Type of Notification</b></label>
+                        <select class="form-control" id="notification-type" required>
+                            <option value="General">General</option>
+                            <option value="Urgent">Urgent</option>
+                            <option value="Reminder">Reminder</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notification-content" class="form-label"><b>Announcement Content</b></label>
+                        <textarea class="form-control" id="notification-content" rows="4" placeholder="Enter your announcement..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                </form>
+
+                <!-- Success Message -->
+                <div id="success-message" class="alert alert-success mt-3" style="display: none;">
+                    Announcement successfully posted!
+                </div>
+            </div>
+        <!-- Post an Announcement Section ends -->
+
+        <!-- Loading Spinner for viewing teachers -->
+        <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #007bff;"></i>
+            <p>Loading, please wait...</p>
+        </div>
+        <!-- Pending Requests Section -->
+        <div id="teachers" class="section" style="display: none;">
+            <h2>TEACHERS</h2>
+            <div id="loading-container"></div> <!-- Loading Placeholder -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>CLASS</th>
+                    </tr>
+                </thead>
+                <tbody id="request-table-teacher">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="notifications" class="section" style="display: none;">
+        <h2>Notifications</h2>
+        
+        <!-- Loading Spinner -->
+        <div id="loading-notifications" style="display: none; text-align: center; margin-top: 20px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #007bff;"></i>
+            <p>Loading, please wait...</p>
+        </div>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Notification</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="notification-table">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+         <!-- Loading Spinner -->
+        <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #007bff;"></i>
+            <p>Loading, please wait...</p>
+        </div>
+        <!-- Pending Requests Section -->
+        <div id="pending-requests" class="section" style="display: none;">
+            <h2>Pending Requests</h2>
+            <div id="loading-container"></div> <!-- Loading Placeholder -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>Teacher</th>
+                        <th>Organization</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="request-table">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+            <button class="btn btn-primary mt-3" onclick="approveSelected()">Approve Selected</button>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const typeOfUser = document.getElementById("type_of_user");
+        const orgAdminFields = document.getElementById("org-admin-fields");
+        const teacherFields = document.getElementById("teacher-fields");
+        const organizationDropdown = document.getElementById("organization_id");
+
+        // Auto-fill organization details for admin users
+        function autoFillOrganizationDetails() {
+            document.getElementById("org_name").value = localStorage.getItem("org_name") || "";
+            document.getElementById("state").value = localStorage.getItem("state") || "";
+            document.getElementById("address").value = localStorage.getItem("address") || "";
+            document.getElementById("pincode").value = localStorage.getItem("pincode") || "";
+            document.getElementById("country").value = localStorage.getItem("country") || "";
+        }
+
+        // Show/Hide Fields Based on User Type Selection
+        typeOfUser.addEventListener("change", function () {
+            if (this.value === "org-admin") {
+                orgAdminFields.style.display = "block";
+                teacherFields.style.display = "none";
+                autoFillOrganizationDetails();
+            } else if (this.value === "teacher") {
+                orgAdminFields.style.display = "none";
+                teacherFields.style.display = "block";
+                fetchOrganizations(); // Fetch organizations when "Teacher" is selected
+            } else {
+                orgAdminFields.style.display = "none";
+                teacherFields.style.display = "none";
+            }
+        });
+
+        // Fetch Organizations for Teachers
+        async function fetchOrganizations() {
+            try {
+                const response = await fetch("http://34.121.13.79/user/org-list/", {
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await response.json();
+                organizationDropdown.innerHTML = '<option value="">Select Organization</option>';
+                data.forEach(org => {
+                    organizationDropdown.innerHTML += `<option value="${org.id}">${org.name} (${org.pincode})</option>`;
+                });
+
+                // Auto-select logged-in user's organization
+                const storedOrgId = localStorage.getItem("organization_id");
+                if (storedOrgId) {
+                    organizationDropdown.value = storedOrgId;
+                }
+            } catch (error) {
+                console.error("Error fetching organizations:", error);
+            }
+        }
+
+        // Handle Form Submission
+        document.getElementById("signupForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const userType = typeOfUser.value;
+            let payload = {
+                first_name: document.getElementById("first_name").value,
+                last_name: document.getElementById("last_name").value,
+                email: document.getElementById("email").value,
+                phone_number: document.getElementById("phone_number").value,
+                password: document.getElementById("password").value,
+                type_of_user: userType,
+                from_admin: true
+            };
+
+            if (userType === "teacher") {
+                payload.organization_id = localStorage.getItem("organization_id");
+                payload.class_number = document.getElementById("class_number").value;
+            }
+
+            try {
+                const response = await fetch("http://34.121.13.79/user/user-view/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Successfully Onboarded");
+                    // window.location.href = "sign-in.html";
+                } else {
+                    alert("Signup Failed: " + (data.detail || "Unknown error"));
+                }
+            } catch (error) {
+                console.error("Error during signup:", error);
+                alert("An error occurred. Please try again.");
+            }
+            document.getElementById("signupForm").reset();  
+        });
+    });
+    </script>
+
+    <script>
+        function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(sectionId).style.display = 'block';
+
+        // If user opens the pending requests section, fetch data
+        if (sectionId === 'pending-requests') {
+            fetchPendingRequests();
+        }
+        if (sectionId === 'teachers') {
+            fetchPendingTeachers();
+        }
+        if (sectionId === 'notifications') {
+            fetchNotifications();
+        }
+        }
+
+        // Fetching Teachers List
+        function fetchPendingTeachers() {
+            const token = localStorage.getItem("token");
+
+            // Show loading spinner
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("request-table-teacher").innerHTML = ""; // Clear previous data
+
+            fetch("http://34.121.13.79/user/get-teachers-of-org/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById("request-table-teacher");
+                document.getElementById("loading").style.display = "none"; // Hide loading spinner
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='5' class='text-center'>No Teachers Onboarded.</td></tr>";
+                    return;
+                }
+
+                data.forEach(request => {
+                    const row = `
+                        <tr>
+                            <td>${request.first_name} ${request.last_name}</td>
+                            <td>${request.teacher_email}</td>
+                            <td>${request.class_number}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching pending requests:", error);
+                document.getElementById("loading").innerHTML = "<p style='color: red;'>Failed to load data. Please try again.</p>";
+            });
+        }
+
+        //fetch my notifications
+        function fetchNotifications() {
+            const token = localStorage.getItem("token");
+
+            // Show loading spinner
+            document.getElementById("loading-notifications").style.display = "block";
+            document.getElementById("notification-table").innerHTML = ""; // Clear previous data
+
+            fetch("http://34.121.13.79/user/announcement-view/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById("notification-table");
+                document.getElementById("loading-notifications").style.display = "none"; // Hide loading spinner
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='5' class='text-center'>No notifications available.</td></tr>";
+                    return;
+                }
+
+                data.forEach(notification => {
+                    const row = `
+                        <tr>
+                            <td>${notification.notification_content}</td>
+                            <td>${notification.type_of_notification}</td>
+                            <td>${notification.date}</td>
+                            <td>${notification.time}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deleteNotification(${notification.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching notifications:", error);
+                document.getElementById("loading-notifications").innerHTML = "<p style='color: red;'>Failed to load notifications. Please try again.</p>";
+            });
+            }
+
+        function deleteNotification(notificationId) {
+                const token = localStorage.getItem("token");
+
+                fetch("http://34.121.13.79/user/announcement-view/", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ notification_id: notificationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Notification Deleted:", data);
+                    fetchNotifications(); // Refresh the list after deleting
+                })
+                .catch(error => console.error("Error deleting notification:", error));
+            }
+
+
+
+        //
+        function fetchPendingRequests() {
+            const token = localStorage.getItem("token");
+
+            // Show loading spinner
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("request-table").innerHTML = ""; // Clear previous data
+
+            fetch("http://34.121.13.79/user/view-requests/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById("request-table");
+                document.getElementById("loading").style.display = "none"; // Hide loading spinner
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='5' class='text-center'>No pending requests.</td></tr>";
+                    return;
+                }
+
+                data.forEach(request => {
+                    const row = `
+                        <tr>
+                            <td><input type="checkbox" class="select-item" value="${request.id}"></td>
+                            <td>${request.teacher}</td>
+                            <td>${request.organization}</td>
+                            <td>${request.status}</td>
+                            <td><button class="btn btn-success btn-sm" onclick="approveRequest(${request.id})">Approve</button></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching pending requests:", error);
+                document.getElementById("loading").innerHTML = "<p style='color: red;'>Failed to load data. Please try again.</p>";
+            });
+        }
+
+
+        // Select All functionality
+        document.getElementById("select-all").addEventListener("change", function () {
+            document.querySelectorAll(".select-item").forEach(cb => cb.checked = this.checked);
+        });
+
+        // Approve a single request
+        function approveRequest(requestId) {
+            const token = localStorage.getItem("token");
+
+            fetch("http://34.121.13.79/user/view-requests/", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ record_id: [requestId], status: "approved" })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Request Approved:", data);
+                fetchPendingRequests(); // Refresh list
+            })
+            .catch(error => console.error("Error approving request:", error));
+        }
+
+        // Approve multiple selected requests
+        function approveSelected() {
+            const selectedIds = Array.from(document.querySelectorAll(".select-item:checked")).map(cb => cb.value);
+            
+            if (selectedIds.length === 0) {
+                alert("No requests selected!");
+                return;
+            }
+
+            const token = localStorage.getItem("token");
+
+            fetch("http://34.121.13.79/user/view-requests/", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ record_id: selectedIds, status: "approved" })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Requests Approved:", data);
+                fetchPendingRequests(); // Refresh list
+            })
+            .catch(error => console.error("Error approving requests:", error));
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        }
+
+        function fetchNotificationCount() {
+            const token = localStorage.getItem("token");
+            document.getElementById("notification-count").innerText = "Loading...";
+
+            fetch("http://34.121.13.79/user/notifications/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("notification-count").innerText = data.notification_count || 0;
+            })
+            .catch(error => {
+                console.error("Error fetching notification count:", error);
+                document.getElementById("notification-count").innerText = "Error!";
+            });
+        }
+
+        document.getElementById("announcement-form").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent page reload
+
+            const notificationContent = document.getElementById("notification-content").value;
+            const notificationType = document.getElementById("notification-type").value;
+            const token = localStorage.getItem("token");
+
+            if (!notificationContent.trim()) {
+                alert("Please enter a valid announcement.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://34.121.13.79/user/notifications/", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        notification_content: notificationContent,
+                        type_of_notification: notificationType
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Announcement posted successfully!");
+                    // **🔹 Clear the input fields after successful submission**
+                    document.getElementById("announcement-form").reset();  
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to post announcement.");
+                }
+            } catch (error) {
+                console.error("Error posting announcement:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Student Growth Chart
+        const studentGrowthCtx = document.getElementById('studentGrowthChart').getContext('2d');
+        new Chart(studentGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'New Enrollments',
+                    data: [10, 20, 40, 30, 50, 70],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Video Upload Insights Chart
+        const videoUploadsCtx = document.getElementById('videoUploadsChart').getContext('2d');
+        new Chart(videoUploadsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Lesson 1', 'Lesson 2', 'Lesson 3', 'Lesson 4','Lesson 1', 'Lesson 2', 'Lesson 3', 'Lesson 4'],
+                datasets: [{
+                    label: 'Views',
+                    data: [200, 350, 150, 400, 200, 350, 150, 400],
+                    backgroundColor: ['#28a745', '#ffcc00', '#ff5733', '#007bff'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>
