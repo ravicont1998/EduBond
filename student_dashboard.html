@@ -133,6 +133,31 @@
         .audio-section {
             margin-top: 10px;
         }
+        .dropdown-container {
+            margin-bottom: 20px;
+        }
+        .progress-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .attendance-table, .assignment-table, .progress-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .attendance-table th, .attendance-table td,
+        .assignment-table th, .assignment-table td,
+        .progress-table th, .progress-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .assignment-container {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -141,14 +166,109 @@
         <a href="#" onclick="showSection('prepare-myself')">Ask Edubond</a>
         <a href="#" onclick="showSection('view-insights')">View Insights</a>
         <a href="#" onclick="showSection('alttext-addon')">AltText Addon</a>
-        <a href="#" onclick="showSection('org-admin-notifications'); fetchOrgAdminNotifications();">EduBond Notifications</a>
+        <a href="#" onclick="showSection('org-admin-notifications'); fetchOrgAdminNotifications();">Organization Notifications</a>
+        <a href="#" onclick="showSection('attendance')">Attendance</a>
+        <a href="#" onclick="showSection('assignments')">Assignments</a>
+        <a href="#" onclick="showSection('progress-card')">Progress Card</a>
         <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
     <div class="content">
         
+        <!-- Attendance Section -->
+        <div id="attendance" class="section" style="display:none;">
+            <h2>Attendance</h2>
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-data">
+                    <tr><td>2024-02-20</td><td>Present</td></tr>
+                    <tr><td>2024-02-21</td><td>Absent</td></tr>
+                    <tr><td>2024-02-22</td><td>Present</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Assignments Section -->
+        <div id="assignments" class="section" style="display:none;">
+            <h2>Assignments</h2>
+            <div class="dropdown-container">
+                <label for="assignment-select">Select Assignment:</label>
+                <select id="assignment-select" class="form-control" onchange="showAssignmentDetails()">
+                    <option value="">--Select--</option>
+                    <option value="midterm">Mid-Term</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="half-yearly">Half-Yearly</option>
+                </select>
+            </div>
+            <div id="assignment-details" class="assignment-container">
+                <table class="assignment-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Marks</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignment-data">
+                        <!-- Data will be dynamically inserted -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-info mt-3" onclick="getSummary('assignments')">Get Summary </button>
+            <div id="assignment-summary" class="mt-3 p-3 border rounded bg-light" style="display: none;"></div>
+            <button class="btn btn-secondary mt-2" onclick="speakText('assignment-summary')">
+                <i class="fas fa-volume-up"></i> Speak
+            </button>
+        </div>
 
-
+         <!-- Progress Card Section -->
+        <div id="progress-card" class="section" style="display:none;">
+                <h2>Progress Card</h2>
+                <table class="progress-table" id="progress-data">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Mid-Term</th>
+                            <th>Quarterly</th>
+                            <th>Half-Yearly</th>
+                            <th>Final Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Math</td>
+                            <td>85</td>
+                            <td>88</td>
+                            <td>90</td>
+                            <td>A</td>
+                        </tr>
+                        <tr>
+                            <td>Science</td>
+                            <td>80</td>
+                            <td>85</td>
+                            <td>89</td>
+                            <td>B+</td>
+                        </tr>
+                        <tr>
+                            <td>English</td>
+                            <td>90</td>
+                            <td>92</td>
+                            <td>95</td>
+                            <td>A+</td>
+                        </tr>
+                    </tbody>
+                </table>
+                 <button class="btn btn-info mt-3" onclick="getSummary('progress-card')">Get Summary</button>
+                <div id="progress-summary" class="mt-3 p-3 border rounded bg-light" style="display: none;"></div>
+                <button class="btn btn-secondary mt-2" onclick="speakText('progress-summary')">
+                    <i class="fas fa-volume-up"></i> Speak
+                </button>
+        </div>
+           
         <!-- Prepare Myself Section -->
         <div id="prepare-myself" class="section" style="display:none;">
             <h2>Help me Prepare with Edubond</h2>
@@ -168,20 +288,76 @@
             <h2>Post a Reminder</h2>
             <select class="form-control">
                 <option>General Notification</option>
-                <option>Assignment Due</option>
+                <option>Assignment Reminder</option>
                 <option>Exam Reminder</option>
             </select>
             <textarea class="form-control mt-3" placeholder="Enter your message..."></textarea>
             <button class="btn btn-primary mt-3">Submit</button>
         </div>
 
-        <!-- View Insights Section -->
-        <div id="view-insights" class="section" style="display:none;">
+       <div id="view-insights" class="section" style="display:none;">
             <h2>View Insights</h2>
             <div id="insights-container" class="row">
-                <!-- Insights will be displayed here -->
+                <!-- Dummy Data - Insights Blocks -->
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Mathematics - Algebra</h5>
+                            <video controls width="100%">
+                                <source src="http://34.121.13.79/media/uploaded_videos/30s.mp4" type="video/mp4">
+                            </video>
+                            <h6 class="mt-3">Parent Comments:</h6>
+                            <textarea class="form-control" id="comment-math" placeholder="Add a comment..."></textarea>
+                            <button class="btn btn-primary mt-2" onclick="postComment('comment-math')">Post Comment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Science - Physics Motion</h5>
+                            <video controls width="100%">
+                                <source src="http://34.121.13.79/media/uploaded_videos/30s.mp4" type="video/mp4">
+                            </video>
+                            <h6 class="mt-3">Parent Comments:</h6>
+                            <textarea class="form-control" id="comment-science" placeholder="Add a comment..."></textarea>
+                            <button class="btn btn-primary mt-2" onclick="postComment('comment-science')">Post Comment</button>
+                        </div>
+                    </div>
+                </div>
+<!-- 
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">English - Literature Analysis</h5>
+                            <video controls width="100%">
+                                <source src="http://34.121.13.79/media/uploaded_videos/30s.mp4" type="video/mp4">
+                            </video>
+                            <h6 class="mt-3">Parent Comments:</h6>
+                            <textarea class="form-control" id="comment-english" placeholder="Add a comment..."></textarea>
+                            <button class="btn btn-primary mt-2" onclick="postComment('comment-english')">Post Comment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">History - World War II</h5>
+                            <video controls width="100%">
+                                <source src="http://34.121.13.79/media/uploaded_videos/30s.mp4" type="video/mp4">
+                            </video>
+                            <h6 class="mt-3">Parent Comments:</h6>
+                            <textarea class="form-control" id="comment-history" placeholder="Add a comment..."></textarea>
+                            <button class="btn btn-primary mt-2" onclick="postComment('comment-history')">Post Comment</button>
+                        </div>
+                    </div>
+                </div> -->
+
             </div>
         </div>
+
 
         <!-- Org Admin Notifications Section -->
         <div id="org-admin-notifications" class="section" style="display:none;">
@@ -215,6 +391,118 @@
     </div>
 
     <script>
+    function postComment(commentId) {
+        const commentText = document.getElementById(commentId).value.trim();
+        if (commentText === "") {
+            alert("Please enter a comment before posting.");
+            return;
+        }
+        alert(`Comment posted successfully: ${commentText}`);
+        document.getElementById(commentId).value = ""; // Clear input after posting
+    }
+    function speakText(summaryId) {
+        const summaryText = document.getElementById(summaryId).innerText;
+        if (!summaryText.trim()) {
+            alert("Nothing to read!");
+            return;
+        }
+
+        // Map short codes to full language codes
+        const languageMap = {
+            "en": "en-US",
+            "hi": "hi-IN",
+            "es": "es-ES",
+            "fr": "fr-FR",
+            "de": "de-DE"
+        };
+
+        const storedLang = localStorage.getItem("pref_lang") || "en";
+        const langCode = languageMap[storedLang] || storedLang; // Use mapped language if available
+
+        const speech = new SpeechSynthesisUtterance(summaryText);
+        speech.lang = langCode;
+        speech.rate = 1;
+        speech.pitch = 1;
+        window.speechSynthesis.speak(speech);
+    }
+
+    async function getSummary(section) {
+        let tableData = "";
+        let tableId = "";
+        let summaryBoxId = "";
+
+        if (section === "assignments") {
+            tableId = "assignment-data";
+            summaryBoxId = "assignment-summary";
+        } else if (section === "progress-card") {
+            tableId = "progress-data";
+            summaryBoxId = "progress-summary";
+        }
+
+        // Extract table data
+        const rows = document.querySelectorAll(`#${tableId} tr`);
+        rows.forEach(row => {
+            const cells = row.querySelectorAll("td");
+            const rowData = Array.from(cells).map(cell => cell.innerText).join(", ");
+            tableData += rowData + "\n";
+        });
+
+        if (!tableData.trim()) {
+            alert("No data found to summarize.");
+            return;
+        }
+
+        // Construct the API request
+        const token = localStorage.getItem("token");
+        const pref_lang = localStorage.getItem("pref_lang");
+        const prompt = `Explain this table data in detail in short:\n${tableData}. please explain summary in the language, which this code belongs to: ${pref_lang}`;
+        
+        // Show loading message
+        document.getElementById(summaryBoxId).innerText = "Fetching summary...";
+        document.getElementById(summaryBoxId).style.display = "block";
+
+        try {
+            const response = await fetch('http://34.121.13.79/user/ask-edubond/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById(summaryBoxId).innerText = data.response;
+            } else {
+                document.getElementById(summaryBoxId).innerText = "Failed to fetch summary.";
+            }
+        } catch (error) {
+            console.error('Error fetching summary:', error);
+            document.getElementById(summaryBoxId).innerText = "An error occurred while fetching the summary.";
+        }
+    }
+
+
+    function showAssignmentDetails() {
+            const assignmentData = {
+                midterm: [["Math", "80", "B"], ["Science", "85", "B+"], ["English", "90", "A"]],
+                quarterly: [["Math", "88", "A"], ["Science", "82", "B"], ["English", "91", "A-"]],
+                "half-yearly": [["Math", "90", "A+"], ["Science", "89", "A"], ["English", "95", "A+"]]
+            };
+            const selected = document.getElementById("assignment-select").value;
+            const tableBody = document.getElementById("assignment-data");
+
+            tableBody.innerHTML = "";
+            if (selected && assignmentData[selected]) {
+                assignmentData[selected].forEach(row => {
+                    tableBody.innerHTML += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                document.getElementById("assignment-details").style.display = "block";
+            } else {
+                document.getElementById("assignment-details").style.display = "none";
+            }
+    }
 
     async function fetchOrgAdminNotifications() {
         const token = localStorage.getItem("token");
@@ -367,71 +655,71 @@
         container.innerHTML = card + container.innerHTML;
     }
 
-    async function fetchInsights() {
-        const token = localStorage.getItem("token");
+    // async function fetchInsights() {
+    //     const token = localStorage.getItem("token");
 
-        try {
-            const response = await fetch('http://34.121.13.79/user/view-insights/', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Token ${token}`
-                }
-            });
+    //     try {
+    //         const response = await fetch('http://34.121.13.79/user/view-insights/', {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Authorization': `Token ${token}`
+    //             }
+    //         });
 
-            if (response.ok) {
-                const data = await response.json();
-                const insightsContainer = document.getElementById('insights-container');
-                insightsContainer.innerHTML = ''; 
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             const insightsContainer = document.getElementById('insights-container');
+    //             insightsContainer.innerHTML = ''; 
 
-                data.insights.forEach(insight => {
-                    const report = insight.edubond_report;
-                    const parentComments = insight.parent_report;
+    //             data.insights.forEach(insight => {
+    //                 const report = insight.edubond_report;
+    //                 const parentComments = insight.parent_report;
 
-                    const card = `
-                    <div class="insight-card">
-                        <div>
-                            <video controls>
-                                <source src="${insight.video_url}" type="video/mp4">
-                            </video>
-                            <audio controls class="audio-section">
-                                <source src="${insight.audio_url}" type="audio/mpeg">
-                            </audio>
-                        </div>
-                        <div class="insight-details">
-                            <h5>${insight.topic_name}</h5>
-                            <p><strong>Date:</strong> ${insight.created_date}</p>
-                            <p><strong>EduBond AI Report:</strong></p>
-                            <ul>
-                                <li>Clarity: ${report.clarity || 'N/A'}</li>
-                                <li>Analysis: ${report.analysis || 'N/A'}</li>
-                                <li>Speaking: ${report.speaking || 'N/A'}</li>
-                                <li>Engagement: ${report.engagement || 'N/A'}</li>
-                            </ul>
-                            <p><strong>Parent Comments:</strong></p>
-                            <div class="comment-section">
-                                ${Object.entries(parentComments || {}).map(([key, value]) => `
-                                    <div class="comment-card"><strong>${key}:</strong> ${value}</div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                    insightsContainer.innerHTML += card;
-                });
-            } else {
-                const errorData = await response.json();
-                console.error('Error fetching insights:', errorData.detail);
-                alert('Failed to fetch insights');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.querySelector('#view-insights').style.display !== 'none') {
-            fetchInsights();
-        }
-    });
+    //                 const card = `
+    //                 <div class="insight-card">
+    //                     <div>
+    //                         <video controls>
+    //                             <source src="${insight.video_url}" type="video/mp4">
+    //                         </video>
+    //                         <audio controls class="audio-section">
+    //                             <source src="${insight.audio_url}" type="audio/mpeg">
+    //                         </audio>
+    //                     </div>
+    //                     <div class="insight-details">
+    //                         <h5>${insight.topic_name}</h5>
+    //                         <p><strong>Date:</strong> ${insight.created_date}</p>
+    //                         <p><strong>EduBond AI Report:</strong></p>
+    //                         <ul>
+    //                             <li>Clarity: ${report.clarity || 'N/A'}</li>
+    //                             <li>Analysis: ${report.analysis || 'N/A'}</li>
+    //                             <li>Speaking: ${report.speaking || 'N/A'}</li>
+    //                             <li>Engagement: ${report.engagement || 'N/A'}</li>
+    //                         </ul>
+    //                         <p><strong>Parent Comments:</strong></p>
+    //                         <div class="comment-section">
+    //                             ${Object.entries(parentComments || {}).map(([key, value]) => `
+    //                                 <div class="comment-card"><strong>${key}:</strong> ${value}</div>
+    //                             `).join('')}
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //                 `;
+    //                 insightsContainer.innerHTML += card;
+    //             });
+    //         } else {
+    //             const errorData = await response.json();
+    //             console.error('Error fetching insights:', errorData.detail);
+    //             alert('Failed to fetch insights');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //     }
+    // }
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     if (document.querySelector('#view-insights').style.display !== 'none') {
+    //         fetchInsights();
+    //     }
+    // });
 
     function triggerFileInput() {
         document.getElementById('video-upload').click();
@@ -623,8 +911,11 @@
             if (sectionId === 'notifications') {
             fetchNotifications();
             }
-            if (sectionId === 'view-insights') {
-                fetchInsights();
+            // if (sectionId === 'view-insights') {
+            //     fetchInsights();
+            // }
+            if (sectionId === 'assignments') {
+                showAssignmentDetails();
             }
 
         }
@@ -749,7 +1040,6 @@
                 alert("Something went wrong. Please try again.");
             }
         });
-
         function logout() {
             const token = localStorage.getItem("token");
 

@@ -91,7 +91,7 @@
                 <a href="#students" onclick="showSection('students')"><i class="fas fa-user-graduate"></i> Students</a>
                 <!-- <a href="#videos" onclick="showSection('videos')"><i class="fas fa-video"></i> Video Upload</a>
                 <a href="#analytics" onclick="showSection('analytics')"><i class="fas fa-chart-line"></i> Analytics</a> -->
-                <a href="#settings" onclick="showSection('settings')"><i class="fas fa-cogs"></i> Settings</a>
+                <!-- <a href="#settings" onclick="showSection('settings')"><i class="fas fa-cogs"></i> Settings</a> -->
                 <a href="#onboard-teacher-admin" onclick="showSection('onboard-teacher-admin')"><i class="fas fa-cogs"></i> Onboard</a>
                 <a href="#post-announcement" onclick="showSection('post-announcement'); fetchNotificationCount();">
                     <i class="fas fa-bullhorn"></i> Post Announcement
@@ -106,6 +106,38 @@
     
     <div class="content">
 
+
+        <!-- Students Section -->
+        <div id="students" class="section" style="display: none;">
+            <h2>Students</h2>
+            
+            <!-- Dropdown to filter by class -->
+            <label for="class-filter">Select Class:</label>
+            <select id="class-filter" class="form-control w-25" onchange="filterStudents()">
+                <option value="all">All Classes</option>
+                <option value="1A">1A</option>
+                <option value="1B">1B</option>
+                <option value="2A">2A</option>
+                <option value="3B">3B</option>
+                <option value="4A">4A</option>
+            </select>
+
+            <!-- Table to display students -->
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Parent Email</th>
+                        <th>Parent Contact</th>
+                        <th>Preferred Language</th>
+                    </tr>
+                </thead>
+                <tbody id="students-table-body">
+                    <!-- Data will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </div>
         <!-- // home page content starts -->
         <div id="home" class="section">
             <h2>Admin Dashboard Overview</h2>
@@ -393,6 +425,44 @@
 
 
     <script>
+    const studentsData = [
+        { name: "STUDENT TEMP1", class: "4A", email: "parent1@edubond.com", contact: "9704144938", lang: "en" },
+        { name: "STUDENT TEMP2", class: "4A", email: "parent2@edubond.com", contact: "9704144938", lang: "te" },
+        { name: "STUDENT TEMP3", class: "4A", email: "parent3@edubond.com", contact: "9704144938", lang: "te" },
+        { name: "STUDENT TEMP4", class: "4A", email: "parent4@edubond.com", contact: "9704144938", lang: "hi" },
+        { name: "STUDENT TEMP5", class: "3B", email: "parent5@edubond.com", contact: "9704144939", lang: "en" },
+        { name: "STUDENT TEMP6", class: "3B", email: "parent6@edubond.com", contact: "9704144940", lang: "hi" },
+        { name: "STUDENT TEMP7", class: "2A", email: "parent7@edubond.com", contact: "9704144941", lang: "te" },
+        { name: "STUDENT TEMP8", class: "1B", email: "parent8@edubond.com", contact: "9704144942", lang: "en" },
+        { name: "STUDENT TEMP9", class: "1A", email: "parent9@edubond.com", contact: "9704144943", lang: "te" }
+    ];
+
+    // Function to filter students by class
+    function filterStudents() {
+        const selectedClass = document.getElementById("class-filter").value;
+        const tableBody = document.getElementById("students-table-body");
+        tableBody.innerHTML = "";
+
+        // Filter and display the students
+        studentsData.forEach(student => {
+            if (selectedClass === "all" || student.class === selectedClass) {
+                const row = `
+                    <tr>
+                        <td>${student.name}</td>
+                        <td>${student.class}</td>
+                        <td>${student.email}</td>
+                        <td>${student.contact}</td>
+                        <td>${student.lang}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            }
+        });
+    }
+
+    // Load all students initially
+    document.addEventListener("DOMContentLoaded", filterStudents);
+    
     document.addEventListener("DOMContentLoaded", function () {
         const typeOfUser = document.getElementById("type_of_user");
         const orgAdminFields = document.getElementById("org-admin-fields");
